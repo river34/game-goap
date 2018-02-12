@@ -21,17 +21,16 @@
 #include "Params.h"
 #include "Planner.h"
 #include "Variable.h"
-#include "VariableFactory.h"
 #include "../rapidxml/rapidxml.hpp"
 
 using namespace rapidxml;
 
 namespace GameGOAP
 {
-	class GOAPLoader
+	class VariableLoader
 	{
 	public:
-		void loaGOAP(const std::string& _file, ActionFactory* _actionFactory, std::vector<Action*>& _actions, VariableFactory* _variableFactory, std::vector<Variable*>& _variables, WorldState& _initialState, WorldState& _goalState, const bool _isFilepath)
+		void loaGOAP(const std::string& _file, ActionFactory* _actionFactory, std::vector<Action*>& _actions, std::vector<std::string>& _variableMap, WorldState& _initialState, WorldState& _goalState, const bool _isFilepath)
 		{
 			std::vector<char> buffer;
 
@@ -59,21 +58,6 @@ namespace GameGOAP
 			// find the root node
 			xml_node<>* root_node = doc.first_node("GOAP");
 
-			// find the VariableList node
-			xml_node<>* variableList_node = root_node->first_node("VariableList");
-
-			// iterate over variables
-			for (xml_node<>* variable_node = variableList_node->first_node("Variable"); variable_node; variable_node = variable_node->next_sibling("Variable"))
-			{
-				// create variable
-				auto newVariable = _variableFactory->createInstance(variable_node);
-				assert(newVariable);
-				std::cout << "[GOAPLoader] Create Variable " << newVariable->getName() << std::endl;
-
-				// add variable to the variable list
-				_variables.push_back(newVariable);
-			}
-
 			// find the ActionList node
 			xml_node<>* actionList_node = root_node->first_node("ActionList");
 
@@ -88,7 +72,7 @@ namespace GameGOAP
 				// add preconditions
 				for (xml_node<>* pre_node = action_node->first_node("Precondition"); pre_node; pre_node = pre_node->next_sibling("Precondition"))
 				{
-					Variable var = getVariable(pre_node, _variables);
+					Variable var = getVariable(pre_node, _variableMap);
 					newAction->setPrecondition(var.m_iKey, var.m_bValue);
 					std::cout << "  [GOAPLoader] Add Precondition. key = " << var.m_iKey << " value = " << var.m_bValue << std::endl;
 				}
@@ -96,7 +80,7 @@ namespace GameGOAP
 				// add effects
 				for (xml_node<>* eff_node = action_node->first_node("Effect"); eff_node; eff_node = eff_node->next_sibling("Effect"))
 				{
-					Variable var = getVariable(eff_node, _variables);
+					Variable var = getVariable(eff_node, _variableMap);
 					newAction->setEffect(var.m_iKey, var.m_bValue);
 					std::cout << "  [GOAPLoader] Add Effect. key = " << var.m_iKey << " value = " << var.m_bValue << std::endl;
 				}
@@ -112,7 +96,7 @@ namespace GameGOAP
 			// add variables
 			for (xml_node<>* var_node = initialState_node->first_node("Variable"); var_node; var_node = var_node->next_sibling("Variable"))
 			{
-				Variable var = getVariable(var_node, _variables);
+				Variable var = getVariable(var_node, _variableMap);
 				_initialState.setVariable(var.m_iKey, var.m_bValue);
 				std::cout << "  [GOAPLoader] Add Variable. key = " << var.m_iKey << " value = " << var.m_bValue << std::endl;
 			}
@@ -124,29 +108,27 @@ namespace GameGOAP
 			// add variables
 			for (xml_node<>* var_node = goalState_node->first_node("Variable"); var_node; var_node = var_node->next_sibling("Variable"))
 			{
-				Variable var = getVariable(var_node, _variables);
+				Variable var = getVariable(var_node, _variableMap);
 				_goalState.setVariable(var.m_iKey, var.m_bValue);
 				std::cout << "  [GOAPLoader] Add Variable. key = " << var.m_iKey << " value = " << var.m_bValue << std::endl;
 			}
 		} // end of loaGOAP
 
-		Variable getVariable(xml_node<>* _node, std::vector<Variable*>& _variables)
+		Variable getVariable(xml_node<>* _node, std::vector<std::string>& _variableMap)
 		{
-			assert(_node->first_attribute("id") != nullptr);
+			assert(_node->first_attribute("name") != nullptr);
 			assert(_node->first_attribute("value") != nullptr);
-			std::string id = _node->first_attribute("id")->value();
-			std::string name = id + "Variable";
+			std::string name = _node->first_attribute("name")->value();
 			bool value = false;
 			std::stringstream s(_node->first_attribute("value")->value());
 			s >> std::boolalpha >> value;
-			for (auto var : _variables)
+			auto it = std::find(_variableMap.begin(), _variableMap.end(), name);
+			if (it == _variableMap.end())
 			{
-				if (var->m_sName == name)
-				{
-					return Variable(var->m_iKey, value);
-				}
+				_variableMap.push_back(name);
 			}
-			return Variable();
+			it = std::find(_variableMap.begin(), _variableMap.end(), name);
+			return Variable(std::distance(_variableMap.begin(), it), value);
 		}
 	};
 }

@@ -11,6 +11,8 @@
 #include <string>
 #include <map>
 #include <ostream>
+#include <vector>
+#include "Variable.h"
 
 namespace GameGOAP
 {
@@ -54,6 +56,24 @@ namespace GameGOAP
 				}
 			}
 			return true;
+		}
+		bool onUpdate(const std::vector<Variable*> _variables)
+		{
+			//std::cout << "  Current state: " << *this << " onUpdate" << std::endl;
+			bool isChanged = false;
+			for (auto var : _variables)
+			{
+				//std::cout << "    Var: " << var->m_sName << " = " << var->m_bValue << std::endl;
+				bool value = m_Variables[var->m_iKey];
+				if (value != var->m_bValue)
+				{
+					isChanged = true;
+					std::cout << "    Variable is changed: " << var->getName() << ", before = " << value << ", after = " << var->m_bValue << std::endl;
+				}
+				m_Variables[var->m_iKey] = var->m_bValue;
+			}
+			//std::cout << "  Current state: " << *this << std::endl;
+			return isChanged;
 		}
 		friend std::ostream& operator<<(std::ostream& _out, const WorldState& _state)
 		{

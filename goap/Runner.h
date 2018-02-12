@@ -31,9 +31,23 @@ namespace GameGOAP
 
 	public:
 		Runner(std::vector<Action*> _actionList, Planner* _planner, WorldState* _initialState, WorldState* _goalState) :
-			m_ActionList(_actionList), m_Planner(_planner), m_InitialState(_initialState), m_GoalState(_goalState) { }
+			m_ActionList(_actionList), m_Planner(_planner), m_InitialState(_initialState), m_GoalState(_goalState) { m_CurrentAction = nullptr; }
 		void tick(Blackboard* _blackboard, bool forcePlan = false)
 		{
+			//std::cout << "tick Runner" << std::endl;
+			//if (m_Path.empty()) std::cout << "m_Path is empty" << std::endl;
+			//else std::cout << "m_Path is not empty" << std::endl;
+			//if (m_ActionList.empty()) std::cout << "m_ActionList is empty" << std::endl;
+			//else std::cout << "m_ActionList is not empty" << std::endl;
+			//if (m_Planner == nullptr) std::cout << "m_Planner == nullptr" << std::endl;
+			//else std::cout << "m_Planner != nullptr" << std::endl;
+			//if (m_InitialState == nullptr) std::cout << "m_InitialState == nullptr" << std::endl;
+			//else std::cout << "m_InitialState != nullptr" << std::endl;
+			//if (m_GoalState == nullptr) std::cout << "m_GoalState == nullptr" << std::endl;
+			//else std::cout << "m_GoalState != nullptr" << std::endl;
+			//if (m_CurrentAction == nullptr) std::cout << "m_CurrentAction == nullptr" << std::endl;
+			//else std::cout << "m_CurrentAction != nullptr" << std::endl;
+
 			if (forcePlan == false)
 			{
 				if (m_CurrentAction == nullptr)

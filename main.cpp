@@ -2,7 +2,9 @@
 #include "demo/Action/AttackAction.h"
 #include "demo/Action/GoToEnemyAction.h"
 #include "demo/Action/SearchAction.h"
-#include "demo/WorldStateInspector.h"
+#include "demo/Variable/EnemyDeadVariable.h"
+#include "demo/Variable/EnemyInRangeVariable.h"
+#include "demo/Variable/EnemyLostVariable.h"
 #include "Blackboard.h"
 
 #include <iostream>
@@ -14,6 +16,9 @@ using namespace GameGOAP;
 using namespace std;
 using namespace std::chrono;
 
+// reset node
+int GameGOAP::Node::lastID = 0;
+
 int main(void)
 {
 	std::cout << "Example running...\n";
@@ -21,6 +26,10 @@ int main(void)
 	// create action list
 	std::vector<Action*> actions;
 	actions.reserve(MAX_ACTIONS);
+
+	// create variable list
+	std::vector<Variable*> variables;
+	actions.reserve(MAX_VARIABLES);
 
 	// create variable map
 	std::vector<std::string> variableMap;
@@ -30,14 +39,18 @@ int main(void)
 	WorldState* goalState = new WorldState;
 
 	// create factory
-	ActionFactory* factory = new ActionFactory;
-	factory->registerClass("AttackAction", AttackAction::create);
-	factory->registerClass("GoToEnemyAction", GoToEnemyAction::create);
-	factory->registerClass("SearchAction", SearchAction::create);
+	ActionFactory* actionFactory = new ActionFactory;
+	actionFactory->registerClass("AttackAction", &AttackAction::create);
+	actionFactory->registerClass("GoToEnemyAction", &GoToEnemyAction::create);
+	actionFactory->registerClass("SearchAction", &SearchAction::create);
+	VariableFactory* variableFactory = new VariableFactory;
+	variableFactory->registerClass("EnemyDeadVariable", &EnemyDeadVariable::create);
+	variableFactory->registerClass("EnemyInRangeVariable", &EnemyInRangeVariable::create);
+	variableFactory->registerClass("EnemyLostVariable", &EnemyLostVariable::create);
 	
 	// load from file
 	GOAPLoader* loader = new GOAPLoader;
-	loader->loaGOAP("GOAPTest1.xml", factory, actions, variableMap, *initialState, *goalState, true);
+	loader->loaGOAP("GOAPTest1.xml", actionFactory, actions, variableFactory, variables, *initialState, *goalState, true);
 
 	// check actions
 	for (auto action : actions)
@@ -81,7 +94,6 @@ int main(void)
 		{
 			runner->tick(blackboard);
 		}
-		WorldStateInspector::onUpdate(blackboard, variableMap, runner->getCurrentState());
 		t += milliseconds(1000);
 		this_thread::sleep_until(t);
 		i++;

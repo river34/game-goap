@@ -9,3 +9,4 @@
 #include "goap/GOAPLoader.h"
 #include "goap/Runner.h"
 #include "goap/Variable.h"
+#include "goap/VariableFactory.h"

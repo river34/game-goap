@@ -19,6 +19,7 @@ namespace GameGOAP
 	private:
 		static int lastID;
 
+	private:
 		WorldState m_WorldState;	// each node wraps a world state
 		int m_iID;			// unique id
 		int m_iParentID;	// unique id of its predecessor
@@ -41,5 +42,3 @@ namespace GameGOAP
 		friend class Planner;
 	};
 }
-
-int GameGOAP::Node::lastID = 0;

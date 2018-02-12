@@ -20,7 +20,10 @@
 
 namespace GameGOAP
 {
+#ifndef MAX_ACTIONS
 #define MAX_ACTIONS 16
+#define MAX_VARIABLES 16
+#endif
 	class Planner
 	{
 	private:
