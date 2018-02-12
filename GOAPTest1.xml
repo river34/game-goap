@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+
+<GOAP name="GOAP_Test_1">
+  <ActionList> <!-- Action List -->
+    <Action id="Search" cost="1">
+      <Precondition name="EnemyLost" value="true"></Precondition>
+      <Effect name="EnemyLost" value="false"></Effect>
+    </Action>
+    <Action id="GoToEnemy" cost="1">
+      <Precondition name="EnemyLost" value="false"></Precondition>
+      <Precondition name="EnemyInRange" value="false"></Precondition>
+      <Effect name="EnemyInRange" value="true"></Effect>
+    </Action>
+    <Action id="Attack" cost="4">
+      <Precondition name="EnemyInRange" value="true"></Precondition>
+      <Precondition name="EnemyDead" value="false"></Precondition>
+      <Effect name="EnemyDead" value="true"></Effect>
+    </Action>
+  </ActionList>
+  
+  <InitialState> <!-- Initial world state -->
+    <Variable name="EnemyLost" value="true"></Variable>
+    <Variable name="EnemyInRange" value="false"></Variable>
+    <Variable name="EnemyDead" value="false"></Variable>
+  </InitialState>
+  
+  <GoalState> <!-- Goal world state -->
+    <Variable name="EnemyDead" value="true"></Variable>
+  </GoalState>
+</GOAP>
